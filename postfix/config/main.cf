@@ -1,0 +1,24 @@
+# Configuración básica mínima
+myhostname = mail.innovate.local
+mydomain = innovate.local
+myorigin = $mydomain
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+
+# Red
+inet_interfaces = all
+inet_protocols = ipv4
+mynetworks = 127.0.0.0/8, 172.20.0.0/16
+
+# Buzones simples
+mail_spool_directory = /var/spool/mail
+
+# Alias
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+
+# Desactivar TLS temporalmente
+smtpd_use_tls = no
+smtp_tls_security_level = none
+
+# Sin content filter inicialmente
+# content_filter = smtp-amavis:[172.20.0.4]:10025

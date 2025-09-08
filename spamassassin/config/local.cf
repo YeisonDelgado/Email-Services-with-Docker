@@ -1,0 +1,23 @@
+# Configuración local de SpamAssassin
+required_score 2.0
+report_safe 0
+rewrite_header Subject [SPAM]
+
+# Configuración de red
+skip_rbl_checks 1
+use_razor2 0
+use_dcc 0
+use_pyzor 0
+
+# Configuración de Bayes
+use_bayes 1
+bayes_auto_learn 1
+bayes_auto_expire 1
+
+# Reglas locales
+score URIBL_BLOCKED 0
+score DNS_FROM_AHBL_RHSBL 0
+
+# Configuración de daemon
+daemonize 1
+pidfile /var/run/spamd.pid

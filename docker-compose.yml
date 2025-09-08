@@ -1,0 +1,64 @@
+services:
+  postfix:
+    build:
+      context: ./postfix
+      dockerfile: Dockerfile
+    image: postfix:alpine
+    container_name: postfix
+    hostname: mail.innovate.local
+    ports:
+      - "25:25"
+      - "587:587"
+    volumes:
+      - ./postfix/config/main.cf:/etc/postfix/main.cf:ro
+      - ./maildata:/var/spool/mail
+    environment:
+      - POSTFIX_HOSTNAME=mail.innovate.local
+      - POSTFIX_DOMAIN=innovate.local
+    networks:
+      - mailnet
+    # Comentar depends_on temporalmente
+    depends_on:
+      - spamassassin
+
+  dovecot:
+    image: dovecot/dovecot:2.3.21
+    container_name: dovecot
+    command: ["dovecot", "-F"]   # importante: foreground mode
+    ports:
+      - "143:143"  # IMAP
+      - "110:110"  # POP3
+      - "993:993"  # IMAPS
+      - "995:995"  # POP3S
+    volumes:
+      - ./dovecot/config/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./maildata:/var/spool/mail
+      - ./dovecot/ssl/dovecot.pem:/etc/ssl/certs/dovecot.pem:ro
+      - ./dovecot/ssl/dovecot.key:/etc/ssl/private/dovecot.pem:ro
+      - ./dovecot/passwd:/etc/dovecot/users:ro
+      - ./data/mail:/var/mail
+      - ./data/logs:/var/log/dovecot   
+      - ./conf.d:/etc/dovecot/conf.d
+
+    networks:
+      - mailnet
+
+  spamassassin:
+    build:
+      context: ./spamassassin
+      dockerfile: Dockerfile
+    container_name: spamassassin
+    command: ["spamd", "-i", "0.0.0.0", "-p", "783", "-D"]
+    ports:
+      - "783:783"
+    volumes:
+      - ./spamassassin/config/local.cf:/etc/spamassassin/local.cf:ro
+    networks:
+      - mailnet
+
+networks:
+  mailnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
